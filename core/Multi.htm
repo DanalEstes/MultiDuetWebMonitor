@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<!--	Multi Duet Monitor and Control
+
+	written  by Danal Estes
+	inspired by Christian Hammacher's DWC
+
+	licensed under the terms of the GPL v2
+	see http://www.gnu.org/licenses/gpl-2.0.html
+-->
+<html lang="en">
+	<head>
+<meta http-equiv="cache-control" content="no-cache, must-revalidate, post-check=0, pre-check=0" />
+<meta http-equiv="cache-control" content="max-age=0" />
+<meta http-equiv="expires" content="0" />
+<meta http-equiv="expires" content="Tue, 01 Jan 1980 1:00:00 GMT" />
+<meta http-equiv="pragma" content="no-cache" />
+	
+	
+		<meta charset="utf-8">
+		<title id="title">Multi Duet Monitor and Control</title>
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta http-equiv="cleartype" content="on">
+		<meta name="description" content="Web Interface Multiple Instances of Duet motion control board">
+		<meta name="author" content="Danal Estes">
+		<meta name="MobileOptimized" content="320">
+		<meta name="HandheldFriendly" content="yes">
+		<meta name="apple-mobile-web-app-capable" content="yes">
+		<meta name="viewport" content="width=480, initial-scale=0.75">
+
+		<!-- Favicon -->
+		<link rel="shortcut icon" href="favicon.ico">
+		<!-- CSS -->
+		<link href="css/dwc.css" rel="stylesheet">
+    <!-- try to use styles from dwc.css; if more needed, put them here --> 
+	<style>
+		.table-breakword td {
+			overflow-wrap: break-word;
+			word-wrap: break-word;
+			-ms-word-break: break-all;
+			/* This is the dangerous one in WebKit, as it breaks things wherever */
+			word-break: break-all;
+			/* Instead use this non-standard one: */
+			word-break: break-word;
+		}
+		.table-breakword input {
+			width: 9em;
+		}
+	  @keyframes flash-red {
+		0%   { background-color: #F99; }
+		49%  { background-color: #F99; }
+		51%  { background-color: #FAA; }
+		100% { background-color: #FAA; }
+	  }
+	  .row-flash-red {
+		animation: flash-red 1s infinite;
+	  }
+}
+
+	</style>
+
+	</head>
+
+	<body>
+
+		<!-- Main Content -->
+		<main id="main_content">
+			<nav class="navbar navbar-default">
+				<div class="container-fluid">
+					<!-- Regular navbar entries -->
+					<div class="collapse navbar-collapse">
+						<ul class="nav nav-justified hidden-xs">
+							<li>
+								<a href="#" class="navbar-brand">
+									<span class="machine-name">Multi Duet Web Monitoring and Control</span>
+								</a>
+							</li>
+						</ul>
+					</div>
+
+		<hr style="height:5px;border:none;color:#333;background-color:#333;">
+		
+			<table class="table table-bordered table-centered-cells table-breakword" id="table_of_printers">
+				<tr>
+					<th>Name and IP</th>
+					<th>Status</th>
+					<th>Controls</th>
+				</tr>
+			</table>
+		
+		<hr style="height:5px;border:none;color:#333;background-color:#333;">
+		<center>
+		<input type="button" class="btn btn-success" id="b-addprinter" value="Add a Printer"></input>
+		<input type="button" class="btn btn-danger"  id="b-delprinter" value="Delete a Printer"></input>
+		<br>
+		<br>
+		<input type="button" class="btn btn-danger"  id="b-discstop" value="Disconnect All and Stop Auto Updates"></input>
+		</center>
+
+		</main>
+	
+		<!-- Modal dialogs -->
+		<div class="modal fade" id="modal_host_input">
+			<div class="modal-dialog modal-md">
+				<div class="modal-content">
+					<form id="form_host">
+						<div class="modal-header">
+							<button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+							<h4 class="modal-title">Add a Printer</h4>
+						</div>
+						<div class="modal-body">
+							<div class="form-group">
+								<label for="input_host">Please enter the IP address or Hostname of your board:</label>
+								<input type="text" class="form-control" id="input_host">
+							</div>
+
+						</div>
+						<div class="modal-footer">
+							<button type="button" class="btn btn-default" data-dismiss="modal"><span class="glyphicon glyphicon-remove"></span> Cancel</button>
+							<button type="submit" class="btn btn-primary"><span class="glyphicon glyphicon-log-in"></span> Next</button>
+						</div>
+					</form>
+				</div>
+			</div>
+		</div>
+
+		<div class="modal fade" id="modal_pass_input">
+			<div class="modal-dialog modal-md">
+				<div class="modal-content">
+					<form id="form_password">
+						<div class="modal-header">
+							<button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+							<h4 class="modal-title">Password required</h4>
+						</div>
+						<div class="modal-body">
+							<div class="form-group">
+								<label for="input_password">Please enter the password: (click "done" if no password)</label>
+								<input type="password" class="form-control" id="input_password">
+							</div>
+						</div>
+						<div class="modal-footer">
+							<button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+							<button type="submit" class="btn btn-primary">Done</button>
+						</div>
+					</form>
+				</div>
+			</div>
+		</div>
+
+		<div class="modal fade" id="modal_host_del_input">
+			<div class="modal-dialog modal-md">
+				<div class="modal-content">
+					<form id="form_del_host">
+						<div class="modal-header">
+							<button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+							<h4 class="modal-title">Delete a Printer</h4>
+						</div>
+						<div class="modal-body">
+							<div class="form-group">
+								<label for="input_del_host">Please select the printer to delete</label>
+								<select class="form-control" id="input_del_drop" name="input_del_host">
+								</select>
+							</div>
+
+						</div>
+						<div class="modal-footer">
+							<button type="button" class="btn btn-default" data-dismiss="modal"><span class="glyphicon glyphicon-remove"></span> Cancel</button>
+							<button type="submit" class="btn btn-primary"><span class="glyphicon glyphicon-log-in"></span> Delete</button>
+						</div>
+					</form>
+				</div>
+			</div>
+		</div>	
+
+		<div class="modal fade" id="modal_stop">
+			<div class="modal-dialog modal-md">
+				<div class="modal-content">
+					<div class="modal-body">
+					<center>
+					All printers Disconnected. Auto Updates Stopped.<br>Please close or reload tab.
+					</center>
+					</div>
+				</div>
+			</div>
+		</div>		
+		
+
+		<div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
+			<label id="label_language">Language:</label>
+			<div class="dropdown" id="dropdown_language">
+				<button class="btn btn-default dropdown-toggle" type="button" id="btn_language" data-language="en" data-toggle="dropdown">
+					<span>English</span>
+					<span class="caret"></span>
+				</button>
+				<ul class="dropdown-menu">
+					<li><a data-language="en" href="#">English</a></li>
+				</ul>
+			</div>
+		</div>
+<br>
+<br>
+<br>
+<br>
+
+<div style="width: 900px; margin: 20px; padding: 10px; border: 3px solid red;">
+	<span >MultiDWMC Web Interface Version <span id="mdwmc_version">1.03</span></span>
+	<br>
+	<br>
+	Limitations of this release:
+	<ul>
+		<li>Pre-Release.  Likely to have simple bugs.  Report <a href="https://www.duet3d.com/forum/thread.php?pid=39029#p39029" target=_blank>in this thread</a>, please.  </li>
+		<li>For now, served only from the internet.  Future releases will be able to be served from a Duet.</li>
+		<li>Only the coloured buttons work. Grey buttons coming soon. </li>
+		<li>Extruder Temp is hardcoded to tool 0 heater 1.  No bed temp yet.</li>
+	</ul>
+
+	<br>
+
+	Hints: 
+	<ul>
+		<li>After you add a printer, wait a minute for auto-connect, auto-update, etc. </li>
+	</ul>
+
+	<br>
+
+	ToDo, in very rough order of priority: 
+	<ol>
+		<li>Make Status (beyond "Idle") auto-update work.</li>
+		<li>Make Other Buttons work.</li>
+		<li>Test serving from duet.</li>
+		<li>Test displaying on Phone/Tablet, etc.</li>
+		<li>Temperature is hardcoded to specific heaters.  ToDo is bring the correct logic over from DWC so that any configuration (that DWC reports) is reported properly.</li>
+		<li>Export/Import printer setup (to allow to move to another browser.)</li>
+		<li>A way to re-order the printer list (clickable headers?)</li>
+		<li>Maybe: Thicker or more visible lines in the table.</li>
+		<li>This was built on DWC and has enormous swaths of DWC code in it that are not used.  ToDo is "Cleanup. Take unusued code out" before putting on Github</li>
+		<li>Put on Github, with instructions on how to download from github and upload to one of your Duets.</li>
+		<li>Improve overall look/feel/style. Input Welcome.  Post to the thread linked above. </li>
+		
+	</ol>
+
+	<br>
+    <hr style="height:3px;border:none;color:#F33;background-color:#F33;" />
+	Release Notes, 1.03: 
+	<ol>
+		<li>Fixed a bug introduced in 1.02 that sometimes prevented newly added printers from obtaining and displaying the board name. (i.e. the name stayed "TBD" forever.)</li>
+	</ol>
+	Release Notes, 1.02: 
+	<ol>
+		<li>Speedup initial connect on page load. </li>
+		<li>Cleanup wording around IP or HostName in several places</li>
+		<li>Added "Disconnect and Close" button.</li>
+		<li>Made individual line "Disconnect" buttons active.</li>
+		<li>Added completion percentage to status while printing</li>
+	</ol>
+	Release Notes, 1.01: 
+	<ol>
+		<li>Allow hostnames (in addition to IP addresses)</li>
+		<li>Fixed table sometimes not (re-)built properly after add or delete</li>
+	</ol>
+
+	
+</div>
+
+	
+		<!-- Placed at the end of the document so the pages load faster -->
+		<script src="js/3rd-party/jquery-3.1.0.js"></script>
+		<script src="js/3rd-party/bootstrap.js"></script>
+		<script src="js/3rd-party/bootstrap-notify.js"></script>
+		<script src="js/MultiDWMC.comm.js"></script>
+		<script src="js/MultiDWMC.interface.js"></script>z
+		<script src="../../DWC Github/core/js/notify.js"></script>
+		<script src="../../DWC Github/core/js/utils.js"></script>
+		<script src="js/MultiDWMC.settings.js"></script>
+	</body>
+</html>	
