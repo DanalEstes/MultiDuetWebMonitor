@@ -29,9 +29,9 @@ Pre-built zips are included.  See "Installation" below.
 
 Multi Duet Web Monitoring and Control can be served from three places:
 
-1) Public internet "http://danalspub.com/Multi"
+1) Public internet "http://danalspub.com/MultiDWMC/"
 2) Any local file system or web server on your network. 
-3) Any Duet on your network. 
+3) Any Duet on your network, after you upload it (see below) via "http://your-printer/multi.htm"
 
 Because Multi Duet Web Monitoring and Control uses .css, font, language.xml, and other files from DWC, and these other files will only be present on a Duet, there are two different build scripts provided. 
 
