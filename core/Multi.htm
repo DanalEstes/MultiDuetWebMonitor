@@ -28,10 +28,18 @@
 		<meta name="viewport" content="width=480, initial-scale=0.75">
 
 		<!-- Favicon -->
-		<link rel="shortcut icon" href="favicon.ico">
+		<link rel="shortcut icon" href="../../DuetWebControl/core/favicon.ico">
 		<!-- CSS -->
-		<link href="css/dwc.css" rel="stylesheet">
-    <!-- try to use styles from dwc.css; if more needed, put them here --> 
+		<link href="../../DuetWebControl/core/css/animate.css" rel="stylesheet">
+		<link href="../../DuetWebControl/core/css/bootstrap.css" rel="stylesheet">
+		<link href="../../DuetWebControl/core/css/bootstrap-slider.css" rel="stylesheet">
+		<link href="../../DuetWebControl/core/css/defaults.css" rel="stylesheet">
+		<link href="../../DuetWebControl/core/css/layout-xs.css" rel="stylesheet">
+		<link href="../../DuetWebControl/core/css/layout-sm.css" rel="stylesheet">
+		<link href="../../DuetWebControl/core/css/layout-md.css" rel="stylesheet">
+		<link href="../../DuetWebControl/core/css/layout-lg.css" rel="stylesheet">  
+	
+	<!-- try to use styles from dwc's existing styles. If more needed, put them here --> 
 	<style>
 		.table-breakword td {
 			overflow-wrap: break-word;
@@ -84,6 +92,7 @@
 					<th>Name and IP</th>
 					<th>Status</th>
 					<th>Controls</th>
+					<th>Sort</th>
 				</tr>
 			</table>
 		
@@ -187,7 +196,7 @@
 		<div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
 			<label id="label_language">Language:</label>
 			<div class="dropdown" id="dropdown_language">
-				<button class="btn btn-default dropdown-toggle" type="button" id="btn_language" data-language="en" data-toggle="dropdown">
+				<button class="btn btn-success dropdown-toggle" type="button" id="btn_language" data-language="en" data-toggle="dropdown">
 					<span>English</span>
 					<span class="caret"></span>
 				</button>
@@ -196,20 +205,25 @@
 				</ul>
 			</div>
 		</div>
+
+
+		<!-- This button is hiddend and not used.  It exists to prevent a fault in "Translate Page" so it can be reused from DWC without change -->
+		<button id="btn_volume" class="hidden btn btn-success dropdown-toggle" type="button" data-toggle="dropdown">
+		<span class="glyphicon glyphicon-hdd"></span> <span class="content">SD Card 0</span> <span class="caret"></span>
+		</button>
+
 <br>
 <br>
 <br>
 <br>
 
 <div style="width: 900px; margin: 20px; padding: 10px; border: 3px solid red;">
-	<span >MultiDWMC Web Interface Version <span id="mdwmc_version">1.03</span></span>
+	<span >MultiDWMC Web Interface Version <span id="mdwmc_version">2.01</span></span>
 	<br>
 	<br>
 	Limitations of this release:
 	<ul>
 		<li>Pre-Release.  Likely to have simple bugs.  Report <a href="https://www.duet3d.com/forum/thread.php?pid=39029#p39029" target=_blank>in this thread</a>, please.  </li>
-		<li>For now, served only from the internet.  Future releases will be able to be served from a Duet.</li>
-		<li>Only the coloured buttons work. Grey buttons coming soon. </li>
 		<li>Extruder Temp is hardcoded to tool 0 heater 1.  No bed temp yet.</li>
 	</ul>
 
@@ -224,22 +238,34 @@
 
 	ToDo, in very rough order of priority: 
 	<ol>
-		<li>Make Status (beyond "Idle") auto-update work.</li>
-		<li>Make Other Buttons work.</li>
-		<li>Test serving from duet.</li>
+		<li>Done! <s>Make Status (beyond "Idle") auto-update work.</li></s>
+		<li>Done:  <s>Make Other Buttons work.</s></li>
+		<li>Done! <s>Allow serving from duet.</li></s>
 		<li>Test displaying on Phone/Tablet, etc.</li>
 		<li>Temperature is hardcoded to specific heaters.  ToDo is bring the correct logic over from DWC so that any configuration (that DWC reports) is reported properly.</li>
 		<li>Export/Import printer setup (to allow to move to another browser.)</li>
-		<li>A way to re-order the printer list (clickable headers?)</li>
-		<li>Maybe: Thicker or more visible lines in the table.</li>
-		<li>This was built on DWC and has enormous swaths of DWC code in it that are not used.  ToDo is "Cleanup. Take unusued code out" before putting on Github</li>
-		<li>Put on Github, with instructions on how to download from github and upload to one of your Duets.</li>
-		<li>Improve overall look/feel/style. Input Welcome.  Post to the thread linked above. </li>
+		<li>Done! <s>A way to re-order the printer list (clickable headers?)</li></s>
+		<li>Done! <s>Maybe: Thicker or more visible lines in the table.</li></s>
+		<li>Done! <s>This was built on DWC and has enormous swaths of DWC code in it that are not used.  ToDo is "Cleanup. Take unusued code out" before putting on Github</s></li>
+		<li>Done! <s>Put on Github, with instructions on how to download from github and upload to one of your Duets.</s></li>
 		
 	</ol>
 
 	<br>
     <hr style="height:3px;border:none;color:#F33;background-color:#F33;" />
+	Release Notes, 2.01: 
+	<ol>
+		<li>Language button now works (translation tables not yet built).</li>
+		<li>Can serve from a Duet. </li>
+		<li>Various bug fixes</li>
+		<li>Removed buttons that did not (yet) work.  Some may be added back in future releases. </li>
+	</ol>
+	Release Notes, 2.00: 
+	<ol>
+		<li>Repackaged to make building for Duet vs. "any server" easier.</li>
+		<li>Added sorting of rows.  Not entirely happy with how it works internally, may change it. </li>
+		<li>Added file name and size when printing.</li>
+	</ol>
 	Release Notes, 1.03: 
 	<ol>
 		<li>Fixed a bug introduced in 1.02 that sometimes prevented newly added printers from obtaining and displaying the board name. (i.e. the name stayed "TBD" forever.)</li>
@@ -263,13 +289,15 @@
 
 	
 		<!-- Placed at the end of the document so the pages load faster -->
-		<script src="js/3rd-party/jquery-3.1.0.js"></script>
-		<script src="js/3rd-party/bootstrap.js"></script>
-		<script src="js/3rd-party/bootstrap-notify.js"></script>
+		<script src="../../DuetWebControl/core/js/3rd-party/jquery-3.1.0.js"></script>
+		<script src="../../DuetWebControl/core/js/3rd-party/bootstrap.js"></script>
+		<script src="../../DuetWebControl/core/js/3rd-party/bootstrap-notify.js"></script>
+		<script src="../../DuetWebControl/core/js/utils.js"></script>
+		<script src="../../DuetWebControl/core/js/notify.js"></script>
+		<script src="../../DuetWebControl/core/js/i18n.js"></script>
 		<script src="js/MultiDWMC.comm.js"></script>
-		<script src="js/MultiDWMC.interface.js"></script>z
-		<script src="../../DWC Github/core/js/notify.js"></script>
-		<script src="../../DWC Github/core/js/utils.js"></script>
 		<script src="js/MultiDWMC.settings.js"></script>
+		<script src="js/MultiDWMC.interface.js"></script>z
+		
 	</body>
 </html>	

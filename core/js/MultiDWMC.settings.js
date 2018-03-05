@@ -10,7 +10,7 @@
 
 var settings = {
 		maxRetries: 1,					// number of AJAX retries before the connection is terminated
-
+		language: "en",
 
 };
 
@@ -24,8 +24,8 @@ function loadSettings() {
 	
 	
 	// Try to parse the stored settings (if any)
-	if (localStorage.getItem("settings") != null) {
-		var loadedSettings = localStorage.getItem("settings");
+	if (localStorage.getItem("MultiSettings") != null) {
+		var loadedSettings = localStorage.getItem("MultiSettings");
 		if (loadedSettings != undefined && loadedSettings.length > 0) {
 			loadedSettings = JSON.parse(loadedSettings);
 
@@ -47,6 +47,7 @@ function loadSettings() {
 	// Apply them
 	applySettings();
 
+	currentGCodeVolume = '';     // Not used in Multi.  Prevents a fault in translatePage() so it can be reused from DWC without change. 
 	// Try to load the translation data
 	$.ajax("language.xml", {
 		type: "GET",
@@ -57,6 +58,7 @@ function loadSettings() {
 		},
 		success: function (response) {
 			translationData = response;
+			showTranslationWarning = true;  //  Override the setting in i18n.js, at least for now
 
 			if (translationData.children == undefined) {
 				// Internet Explorer and Edge cannot deal with XML files in the way we want.
@@ -102,7 +104,7 @@ function saveSettings() {
 	settings.language = $("#btn_language").data("language");
 
 	// Save Settings
-	localStorage.setItem("settings", JSON.stringify(settings));
+	localStorage.setItem("MultiSettings", JSON.stringify(settings));
 }
 
 function constrainSetting(value, defaultValue, minValue, maxValue) {
@@ -118,3 +120,11 @@ function constrainSetting(value, defaultValue, minValue, maxValue) {
 
 	return value;
 }
+
+
+$("body").on("click", "#dropdown_language > ul a", function(e) {
+	$("#btn_language > span:first-child").text($(this).text());
+	$("#btn_language").data("language", $(this).data("language"));
+	e.preventDefault();
+	saveSettings();
+});

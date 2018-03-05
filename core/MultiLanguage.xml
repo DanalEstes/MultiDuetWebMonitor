@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<languages>
+	<de name="Deutsch">
+		<!-- Exclusively for Multi -->
+		<string t="Next">Nächster</string>
+		<string t="Multi Duet Web Monitoring and Control">Multi Duet Web Überwachung und Kontrolle</string>
+		<string t="Done">Erledigt</string>
+		<string t="Add a Printer">Test</string>
+
+	</de>
+</languages>

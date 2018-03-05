@@ -86,84 +86,19 @@ function disconnect(ip) {
 	updateRowDisconnected(ip)
 }
 
-/* Status updates */
-
-function startUpdates() {
-	stopUpdating = false;
-	if (!updateTaskLive) {
-		retryCount = 0;
-		updateStatus();
-	}
-}
-
-function stopUpdates() {
-	stopUpdating = updateTaskLive;
-}
-
-
-function reconnectAfterHalt() {
-	isConnected = updateTaskLive = false;
-	showHaltMessage();
-	setTimeout(function () {
-		reconnectingAfterHalt = true;
-		connect(sessionPassword, false);
-	}, settings.haltedReconnectDelay);
-}
-
-function reconnectAfterUpdate() {
-	if (uploadedDWC || uploadDWCFile != undefined) {
-		if (sessionPassword != defaultPassword) {
-			connect(sessionPassword, false);
-
-			showConfirmationDialog(T("Reload Page?"), T("You have just updated Duet Web Control. Would you like to reload the page now?"), function () {
-				//location.reload();
-			});
-		} else {
-			//location.reload();
-		}
-	} else {
-		connect(sessionPassword, false);
-	}
-}
-
-function requestFileInfo() {
+function requestFileInfo(which) {
+	ajaxPrefix = 'HTTP://'+printers[which].ip+'/';
 	$.ajax(ajaxPrefix + "rr_fileinfo", {
 		dataType: "json",
 		success: function (response) {
-			if (isConnected && response.err == 2) {
+			if (response.err == 2) {
 				// The firmware is still busy parsing the file, so try again until it's ready
 				setTimeout(function () {
-					if (isConnected) {
 						requestFileInfo();
-					}
 				}, 250);
 			} else if (response.err == 0) {
 				// File info is valid, use it
-				fileInfo = response;
-
-				$("#span_progress_left").html(T("Printing {0}", response.fileName));
-
-				$("#dd_size").html(formatSize(response.size));
-				$("#dd_height").html((response.height > 0) ? T("{0} mm", response.height) : T("n/a"));
-				var layerHeight = (response.layerHeight > 0) ? T("{0} mm", response.layerHeight) : T("n/a");
-				if (response.firstLayerHeight > 0) {
-					$("#dd_layer_height").html(T("{0} mm", response.firstLayerHeight) + " / " + layerHeight);
-				} else {
-					$("#dd_layer_height").html(layerHeight);
-				}
-
-				if (response.filament.length == 0) {
-					$("#dd_filament").html(T("n/a"));
-				} else {
-					var filament = T("{0} mm", response.filament.reduce(function (a, b) {
-								return T("{0} mm", a) + ", " + b;
-							}));
-					$("#dd_filament").html(filament);
-				}
-
-				$("#dd_generatedby").html((response.generatedBy == "") ? T("n/a") : response.generatedBy);
-
-				$("#td_print_duration").html(formatTime(response.printDuration));
+				printersStatus[which].fileinfo = response;
 			}
 		}
 	});

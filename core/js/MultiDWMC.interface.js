@@ -15,7 +15,8 @@ printers[0] = {name: 'Example Printer', pwd: "", ip: "192.168.1.20", camurl: "ht
 printersStatus = [];
 printersStatus[0] = {connected: false, status: ''}
 
- 
+showTranslationWarning = true;  //  Override the setting in i18n.js, at least for now
+
 var machineName = "Multi Duet Web Monitoring and Control";
 
 var isPrinting, isPaused, printHasFinished;
@@ -158,7 +159,7 @@ $("#form_host").submit(function (e) {
 	
 	printers.forEach(function(printer) {
 		if (printer.ip == ip) {
-			showMessage("warning","Duplicate IP or Hostname", "Printer " + ip + " already exists", 5, true);
+			showMessage("warning",T("Duplicate IP or Hostname"), T("Printer ") + ip + T(" already exists"), 5, true);
 			badip=1;
 		}
 	});
@@ -166,7 +167,7 @@ $("#form_host").submit(function (e) {
 	if (badip) return;
 	
 	var i=printers.length;
-	printers[i]= {name: "TBD at first status update", pwd: "", ip: ip, camurl: "Null" };
+	printers[i]= {name: T("TBD at first status update"), pwd: "", ip: ip, camurl: "Null" };
 	printersStatus[i] = {connected: false, status: ''}
 	rebuildTable();
 	showPasswordPrompt();
@@ -294,22 +295,28 @@ function rebuildTable() {
 		var row= table.insertRow(-1);
 		row.insertCell().innerHTML = printer.name+'<br><a href="http://'+printer.ip+'" target="_blank">'+printer.ip+'</a>';
 		row.insertCell().innerHTML = 'Unknown; automatic update pending.';
-		row.insertCell().innerHTML = '<input type="button" class="btn btn-success" value="Connect"' +
+		row.insertCell().innerHTML = '<input type="button" class="btn btn-success" value="' + T("Connect") + '"' +
 			' onclick="connect(\''+printer.ip+'\',\''+printer.pwd+'\')" />';
+		row.insertCell().innerHTML = '<button class="btn btn-success btn-sm" onclick="upRow(\''+printer.ip+'\')" >^</button>';
 		row.style.backgroundColor = "#DDDDDD";
 	});	
+	
+	table.rows[1].cells[3].innerHTML='';
 	
 	for (var i = 0, row; row = table.rows[i]; i++) {
 		row.style.borderColor = '#0d9afc'
 		row.cells[0].style.width = "20%";
 		row.cells[1].style.width = "50%";
 		row.cells[2].style.width = "30%";
+		row.cells[3].style.width = "2%";
 		row.cells[0].style.borderColor = '#0d9afc';
 		row.cells[1].style.borderColor = '#0d9afc';
 		row.cells[2].style.borderColor = '#0d9afc';
+		row.cells[3].style.borderColor = '#0d9afc';
 		row.cells[0].style.borderWidth = '2px';
 		row.cells[1].style.borderWidth = '2px';;
 		row.cells[2].style.borderWidth = '2px';;
+		row.cells[3].style.borderWidth = '2px';;
 	}
 
     return;		
@@ -336,7 +343,7 @@ function updateRowConnectFail(ip) {
 			printersStatus[i-1] = {connected: false, status: ''}
 			row.style.backgroundColor = "#FFAAAA";
 			row.cells[1].innerHTML = 'Connect failed<br>Most recent attempt '+(new Date()).toLocaleTimeString();
-			row.cells[2].innerHTML = '<input type="button" class="btn btn-success" value="Connect"' +
+			row.cells[2].innerHTML = '<input type="button" class="btn btn-success" value="' + T("Connect") + '"' +
 									 ' onclick="connect(\''+printers[i-1].ip+'\',\''+printers[i-1].pwd+'\')" />';
 
 		}
@@ -349,8 +356,8 @@ function updateRowDisconnected(ip) {
 		if (row.cells[0].innerText.includes(ip)) {
 			printersStatus[i-1] = {connected: false, status: ''}
 			row.cells[0].innerHTML = printers[i-1].name+'<br><a href="http://'+printers[i-1].ip+'" target="_blank">'+printers[i-1].ip+'</a>';
-			row.cells[1].innerHTML = 'Disconnected.';
-			row.cells[2].innerHTML = '<input type="button" class="btn btn-success" value="Connect"' +
+			row.cells[1].innerHTML = T('Disconnected.');
+			row.cells[2].innerHTML = '<input type="button" class="btn btn-success" value="' + T("Connect") + '"' +
 				' onclick="connect(\''+printers[i-1].ip+'\',\''+printers[i-1].pwd+'\')" />';
 			row.style.backgroundColor = "#DDDDDD";
 		}
@@ -358,11 +365,13 @@ function updateRowDisconnected(ip) {
 }
 
 function updateRowName(which,name) {
-	var table = document.getElementById('table_of_printers');
-	row = table.rows[which+1];
-	row.cells[0].innerHTML = name+'<br><a href="http://'+printers[which].ip+'" target="_blank">'+printers[which].ip+'</a>';
-	printers[which].name = name;
-	saveSettings();
+	if  (printers[which].name !== name) {
+		printers[which].name = name;
+		saveSettings()
+		var table = document.getElementById('table_of_printers');
+		row = table.rows[which+1];
+		row.cells[0].innerHTML = name+'<br><a href="http://'+printers[which].ip+'" target="_blank">'+printers[which].ip+'</a>';
+	}
 }
 
 function updateRowStatus(which,status) {
@@ -387,12 +396,18 @@ function updateRowStatus(which,status) {
 		break;
 
 	case 'S': // Paused / Stopped
-	    row.cells[1].innerText = "Paused"
-		row.cells[2].innerHTML = '<input type="button" class="btn btn-danger" id="b-home" value="Disconnect" ' +
+		var fn = 'Paused<br>'
+		if (typeof(printersStatus[which].fileinfo) !== 'undefined') {
+			fn = 'Paused, file name: "<strong>' + printersStatus[which].fileinfo.fileName + '</strong>", ';
+	        settings.useKiB = 1;
+			fn = fn + formatSize(printersStatus[which].fileinfo.size) + '<br>';
+		}	
+	    row.cells[1].innerHTML = fn
+		row.cells[2].innerHTML = '<input type="button" class="btn btn-danger" id="b-home" value="' + T("Disconnect") + '"' +
 											 ' onclick="disconnect(\''+printers[which].ip+'\')" />' +
 								 '<input type="button" class="btn btn-success" id="b-home" value="Resume" ' +
-									' onclick="sendGCode(\''+printers[which].ip+'\',\'M24\')" />' +	
-								 '<input type="button" class="btn btn-default" id="b-home" value="Open Camera" />';
+									' onclick="sendGCode(\''+printers[which].ip+'\',\'M24\')" />';
+								 //'<input type="button" class="btn btn-default" id="b-home" value="Open Camera" />';
 		row.classList.add("row-flash-red");
 		break;
 
@@ -401,26 +416,43 @@ function updateRowStatus(which,status) {
 		break;
 
 	case 'P': // Printing
-	    row.cells[1].innerHTML = 'Printing<br>' +
+		var fn = 'Printing'
+		if (typeof(printersStatus[which].fileinfo) !== 'undefined') {
+			fn = 'Printing, file name: "<strong>' + printersStatus[which].fileinfo.fileName + '</strong>", ';
+	        settings.useKiB = 1;
+			fn = fn + formatSize(printersStatus[which].fileinfo.size);
+		}
+	    row.cells[1].innerHTML = fn +  
 								 '<div class="progress" style="margin-bottom:0;">' +
 									'<div class="progress-bar progress-bar-striped" id="progress'+printers[which].ip+'";">' +
 									'</div>' +
 								 '</div>';
-		row.cells[2].innerHTML = '<input type="button" class="btn btn-danger" id="b-home" value="Disconnect" ' +
+		row.cells[2].innerHTML = '<input type="button" class="btn btn-danger" id="b-home" value="' + T("Disconnect") + '"' +
 											 ' onclick="disconnect(\''+printers[which].ip+'\')" />' +
 								 '<input type="button" class="btn btn-warning" id="b-home" value="Pause Print" ' +
-									' onclick="sendGCode(\''+printers[which].ip+'\',\'M25\')" />' +	
-								 '<input type="button" class="btn btn-default" id="b-home" value="Open Camera" />';
+									' onclick="sendGCode(\''+printers[which].ip+'\',\'M25\')" />' ;	
+								// '<input type="button" class="btn btn-default" id="b-home" value="Open Camera" />';
 		row.style.backgroundColor = "#E0FFE0";
+		requestFileInfo(which);
 		break;
 
 	case 'M': // Simulating
-	    row.cells[1].innerText = "Simulating"
-		row.cells[2].innerHTML = '<input type="button" class="btn btn-danger" id="b-home" value="Disconnect" ' +
+		var fn = 'Simulating'
+		if (typeof(printersStatus[which].fileinfo) !== 'undefined') {
+			fn = 'Simulating, file name: ' + printersStatus[which].fileinfo.fileName + ', ';
+	        settings.useKiB = 1;
+			fn = fn + formatSize(printersStatus[which].fileinfo.size);
+		}
+	    row.cells[1].innerHTML = fn +  
+								 '<div class="progress" style="margin-bottom:0;">' +
+									'<div class="progress-bar progress-bar-striped" id="progress'+printers[which].ip+'";">' +
+									'</div>' +
+								 '</div>';
+		row.cells[2].innerHTML = '<input type="button" class="btn btn-danger" id="b-home" value="' + T("Disconnect") + '"' +
 											 ' onclick="disconnect(\''+printers[which].ip+'\')" />' +
 								 '<input type="button" class="btn btn-warning" id="b-home" value="Pause Sim" ' +
-									' onclick="sendGCode(\''+printers[which].ip+'\',\'M25\')" />' +	
-								 '<input type="button" class="btn btn-default" id="b-home" value="Open Camera" />';
+									' onclick="sendGCode(\''+printers[which].ip+'\',\'M25\')" />'; 	
+								 //'<input type="button" class="btn btn-default" id="b-home" value="Open Camera" />';
 		row.style.backgroundColor = "#E0FFE0";
 		break;
 
@@ -433,15 +465,13 @@ function updateRowStatus(which,status) {
 		break;
 
 	case 'I': // Idle
-	    row.cells[1].innerText = "Idle"
-		row.cells[2].innerHTML = '<input type="button" class="btn btn-danger" id="b-home" value="Disconnect" ' +
+	    row.cells[1].innerHTML = "Idle<br>"
+		row.cells[2].innerHTML = '<input type="button" class="btn btn-danger" id="b-home" value="' + T("Disconnect") + '"' +
 											 ' onclick="disconnect(\''+printers[which].ip+'\')" />' +
-								 '<input type="button" class="btn btn-default" id="b-home" value="Print File" />' +
-								 '<input type="button" class="btn btn-default" id="b-home" value="Open Camera" /><br>' +
+								 //'<input type="button" class="btn btn-default" id="b-home" value="Print File" />' +
+								 //'<input type="button" class="btn btn-default" id="b-home" value="Open Camera" /><br>' +
 								 '<input type="button" class="btn btn-success" id="b-home" value="Home All" ' +
-									' onclick="sendGCode(\''+printers[which].ip+'\',\'G28\')" />' +	
-								 '<input type="button" class="btn btn-default" id="b-home" value="Auto Cal Bed" />' +
-								 '<input type="button" class="btn btn-default" id="b-home" value="Some Other B" />';
+									' onclick="sendGCode(\''+printers[which].ip+'\',\'G28\')" />';
 		row.style.backgroundColor = "#FFFFE0";
 		break;
 	default:
@@ -455,10 +485,11 @@ function updateRowStatus(which,status) {
 
 function updateRowTemp(which,now,set) {
 	var table = document.getElementById('table_of_printers');
-	row = table.rows[which+1];
-	now = T("{0} °C", now.toFixed(1));
-	set = T("{0} °C", set.toFixed(1));
+	var row = table.rows[which+1];
+	var now = T("{0} °C", now.toFixed(1));
+	var set = T("{0} °C", set.toFixed(1));
 	/* Since we are called after status replaces cell 1, we can always append */
+
 	row.cells[1].innerHTML = row.cells[1].innerHTML + 'Extruder: ' + now + '/'+ set;
 	
 }
@@ -468,4 +499,30 @@ function updateRowProgress(which,progress) {
 	if (!progress > 0) return;
 	document.getElementById("progress"+printers[which].ip).style.width = progress.toFixed(0) + "%";
 	document.getElementById("progress"+printers[which].ip).innerText = T("{0}% Complete", progress);
+}
+
+function upRow(ip) {
+	var which = 0;
+	var table = document.getElementById('table_of_printers');
+	for (var i = 1, row; row = table.rows[i]; i++) {
+		if (row.cells[0].innerText.includes(ip)) {
+			which = i;
+			break;
+		}
+	}
+	
+	which--; // Change table offset to array offset. 
+
+	if (which > 0) {
+		tmp=printers[which-1]
+		printers[which-1]=printers[which];
+		printers[which]=tmp;
+
+		tmp=printersStatus[which-1]
+		printersStatus[which-1]=printersStatus[which];
+		printersStatus[which]=tmp;
+
+		rebuildTable();
+		saveSettings();
+	}
 }
