@@ -53,11 +53,11 @@ Multi Duet Web Control uses the same internationalization as Duet Web Control.  
 
 ## Installation
 
-1) To install on a stand-alone web server, download the "MultiDuetWebControl-All-$VERSION.zip", unzip the entire directory structure to the location of your choice on the web server, and invoke via a URL that opens page "Multi.htm", such as "http://mywebserver/somedir/Multi.htm"
+1) To install on a stand-alone web server, download the "MultiDuetWebControl-All-$VERSION.zip", unzip the entire directory structure to the location of your choice on the web server, and invoke via a URL that opens page "Multi.htm", such as "http://mywebserver/somedir/multi.htm"
 
-2) To install on a local PC file system, download the "MultiDuetWebControl-All-$VERSION.zip", unzip the entire directory structure to the location of your choice on the file system, server, and invoke via a URL that opens page "Multi.htm", such as "file:///C:/Users/Joe/MultiDuet/Multi.htm"
+2) To install on a local PC file system, download the "MultiDuetWebControl-All-$VERSION.zip", unzip the entire directory structure to the location of your choice on the file system, server, and invoke via a URL that opens page "Multi.htm", such as "file:///C:/Users/Joe/MultiDuet/multi.htm"
 
-3) To install on a Duet, download the "MultiDuetWebControl-Duet-$VERSION.zip", uplod to the Duet via normal DWC 'Settings' > 'Upload File(s)' buttons.  (Do not unzip; just upload the whole zip).   Invoke via URL "http://my-duet-name-or-ip/Multi.htm".  
+3) To install on a Duet, download the "MultiDuetWebControl-Duet-$VERSION.zip", uplod to the Duet via normal DWC 'Settings' > 'Upload File(s)' buttons.  (Do not unzip; just upload the whole zip).   Invoke via URL "http://my-duet-name-or-ip/multi.htm".  
 
 Multi Duet Web Control and Monitoring need only be uploaded to one Duet; after loading, other Duets can be added for monitoring. 
 
