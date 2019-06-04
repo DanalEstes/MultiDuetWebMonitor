@@ -111,9 +111,12 @@ function updateStatusNew(which) {
 			
 			// Hard coded temps, for now
 			if (status.temps.hasOwnProperty("current") && status.temps.hasOwnProperty("state")) {
-				var now    = status.temps.current[1];
-				var set = status.temps.tools.active[0][0];
-				updateRowTemp(which,now,set);
+				updateRowTemp(which,
+					status.temps.current[1],
+					status.temps.tools.active[0][0],
+					status.temps.bed.current,
+					status.temps.bed.active,
+					);
 			}
 			
 			/* Capture percent printed, if we received it */
@@ -483,14 +486,17 @@ function updateRowStatus(which,status) {
 	}
 }
 
-function updateRowTemp(which,now,set) {
+function updateRowTemp(which,tnow,tset,bnow,bset) {
 	var table = document.getElementById('table_of_printers');
 	var row = table.rows[which+1];
-	var now = T("{0} °C", now.toFixed(1));
-	var set = T("{0} °C", set.toFixed(1));
-	/* Since we are called after status replaces cell 1, we can always append */
 
-	row.cells[1].innerHTML = row.cells[1].innerHTML + 'Extruder: ' + now + '/'+ set;
+	/* Since we are called after status replaces cell 1, we can always append */
+	var now = T("{0} °C", tnow.toFixed(1));
+	var set = T("{0} °C", tset.toFixed(1));
+	row.cells[1].innerHTML = row.cells[1].innerHTML + '&nbsp;&nbsp;Extruder:&nbsp;' + now + '/'+ set;
+	var now = T("{0} °C", bnow.toFixed(1));
+	var set = T("{0} °C", bset.toFixed(1));
+	row.cells[1].innerHTML = row.cells[1].innerHTML + '<br>Print Bed:&nbsp;&nbsp;&nbsp;' + now + '/&nbsp;&nbsp;'+ set;
 	
 }
 
