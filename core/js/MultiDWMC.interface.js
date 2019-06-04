@@ -119,6 +119,13 @@ function updateStatusNew(which) {
 					);
 			}
 			
+			if (status.temps.hasOwnProperty("chamber") && status.temps.hasOwnProperty("state")) {
+				updateRowTempChamber(which,
+					status.temps.chamber.current,
+					status.temps.chamber.active,
+					);
+			}
+			
 			/* Capture percent printed, if we received it */
 			if (status.hasOwnProperty("fractionPrinted") ) {
 				var progress = status.fractionPrinted;
@@ -493,13 +500,22 @@ function updateRowTemp(which,tnow,tset,bnow,bset) {
 	/* Since we are called after status replaces cell 1, we can always append */
 	var now = T("{0} °C", tnow.toFixed(1));
 	var set = T("{0} °C", tset.toFixed(1));
-	row.cells[1].innerHTML = row.cells[1].innerHTML + '&nbsp;&nbsp;Extruder:&nbsp;' + now + '/'+ set;
+	row.cells[1].innerHTML = row.cells[1].innerHTML + '&nbsp;&nbsp;Extruder:&nbsp;' + now + ' / '+ set;
 	var now = T("{0} °C", bnow.toFixed(1));
 	var set = T("{0} °C", bset.toFixed(1));
-	row.cells[1].innerHTML = row.cells[1].innerHTML + '<br>Print Bed:&nbsp;&nbsp;&nbsp;' + now + '/&nbsp;&nbsp;'+ set;
+	row.cells[1].innerHTML = row.cells[1].innerHTML + '<br>Print Bed:&nbsp;&nbsp;&nbsp;' + now + ' / '+ set;
 	
 }
 
+function updateRowTempChamber(which,cnow,cset) {
+	var table = document.getElementById('table_of_printers');
+	var row = table.rows[which+1];
+
+	/* Since we are called after status replaces cell 1, we can always append */
+	var now = T("{0} °C", cnow.toFixed(1));
+	var set = T("{0} °C", cset.toFixed(1));
+	row.cells[1].innerHTML = row.cells[1].innerHTML + '<br>&nbsp;&nbsp;Chamber:&nbsp;' + now + ' / '+ set;
+}
 function updateRowProgress(which,progress) {
 	var progress = printersStatus[which].progress;
 	if (!progress > 0) return;

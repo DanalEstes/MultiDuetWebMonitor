@@ -20,6 +20,7 @@ GZIP=gzip
 # Check for required tools
 if [[ ! $(type $YUI_COMPRESSOR 2>/dev/null) ]]; then
 	echo "yui-compressor not found in PATH!"
+	echo $PATH
 	exit
 fi
 
